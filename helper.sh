@@ -3,6 +3,9 @@
 BUILD=0
 PUBLISH=0
 CLEAN=0
+PLATTAFORM=linux/amd64
+BASE=python:3
+IMAGE=sneakykoder/python-cli
 
 while [ $# -gt 0 ]; do
     key="$1"
@@ -14,6 +17,7 @@ while [ $# -gt 0 ]; do
             ;;
         -b|--build)
             BUILD=1
+            PLATTAFORM="$2"
             shift
             ;;
         -p|--publish)
@@ -23,7 +27,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-IMAGE=sneakykoder/python-cli
+if [ -z $PLATTAFORM ]; then
+    PLATTAFORM='linux/amd64'
+fi
 
 if [ $CLEAN = 1 ]; then
     echo "---- Clean ----"
@@ -33,8 +39,11 @@ fi
 
 if [ $BUILD = 1 ]; then
     echo '---- Build ----'
+    echo 'Platform: '${PLATTAFORM}
+    docker pull ${BASE} --platform ${PLATTAFORM}
+    
     docker buildx build \
-    --platform linux/amd64 \
+    --platform ${PLATTAFORM} \
     --no-cache \
     --file Dockerfile \
     --tag ${IMAGE}:3 \
